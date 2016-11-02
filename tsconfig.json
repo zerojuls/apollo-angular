@@ -18,7 +18,8 @@
     "src/index.ts",
     "tests/Apollo.spec.ts",
     "tests/SelectPipe.spec.ts",
-    "tests/ApolloModule.spec.ts"
+    "tests/ApolloModule.spec.ts",
+    "tests/graphql.spec.ts"
   ],
   "angularCompilerOptions": {
     "genDir": "compiled",
