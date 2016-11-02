@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Apollo, ApolloQueryObservable } from 'apollo-angular';
+import { Apollo, ApolloQueryObservable, graphql } from 'apollo-angular';
 import { ApolloQueryResult } from 'apollo-client';
 import { Subject } from 'rxjs/Subject';
 
@@ -28,13 +28,44 @@ interface AddUserMutationResult {
   addUser: User;
 }
 
+export const getUsersQuery = gql`
+  query getUsers($name: String) {
+    users(name: $name) {
+      firstName
+      lastName
+      emails {
+        address
+        verified
+      }
+    }
+  }
+`;
+
+export const getUsersQueryEmpty = gql`
+  query getUsers {
+    users(name: "") {
+      firstName
+      lastName
+      emails {
+        address
+        verified
+      }
+    }
+  }
+`;
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
 })
+@graphql([{
+  name: 'emptyUsers',
+  query: getUsersQueryEmpty
+}])
 export class AppComponent implements OnInit, AfterViewInit {
   // Observable with GraphQL result
   public users: ApolloQueryObservable<GetUsersQueryResult>;
+  public emptyUsers: ApolloQueryObservable<GetUsersQueryResult>;
   public firstName: string;
   public lastName: string;
   public nameControl = new FormControl();
@@ -42,26 +73,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   public nameFilter: Subject<string> = new Subject<string>();
   private apollo: Apollo;
 
-  // Inject Angular2Apollo service
+  // Inject Apollo service
   constructor(apollo: Apollo) {
+    console.log('apollo', apollo);
     this.apollo = apollo;
   }
 
   public ngOnInit() {
     // Query users data with observable variables
     this.users = this.apollo.watchQuery<GetUsersQueryResult>({
-      query: gql`
-        query getUsers($name: String) {
-          users(name: $name) {
-            firstName
-            lastName
-            emails {
-              address
-              verified
-            }
-          }
-        }
-      `,
+      query: getUsersQuery,
       variables: {
         name: this.nameFilter,
       },
