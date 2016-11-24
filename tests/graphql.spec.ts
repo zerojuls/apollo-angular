@@ -1,31 +1,32 @@
 import './_common';
-import {Document} from 'graphql';
+
+import { Document } from 'graphql';
+
+import { graphql, wrapPrototype, assignInput, GraphqlInput } from '../src/graphql';
+import { Angular2Apollo } from '../src';
+
 import gql from 'graphql-tag';
-import {graphql, wrapPrototype, assignInput, GraphqlInput} from '../src/graphql';
-import {Angular2Apollo} from '../src';
 
 const query: Document = gql`
-    query getBar {
-        bar {
-            name
-        }
+  query getBar {
+    bar {
+      name
     }
+  }
 `;
-
 const mutation: Document = gql`
-    mutation changeBar {
-        changeBar {
-            name
-        }
+  mutation changeBar {
+    changeBar {
+      name
     }
+  }
 `;
-
 const subscription: Document = gql`
-    subscription dataChange {
-        dataChange {
-            name
-        }
+  subscription dataChange {
+    dataChange {
+      name
     }
+  }
 `;
 
 describe('wrapPrototype', () => {
@@ -53,7 +54,7 @@ describe('wrapPrototype', () => {
 describe('assignInput', () => {
   it('should assign a input', () => {
     const spy = jest.fn();
-    const input: GraphqlInput = {query};
+    const input: GraphqlInput = { query };
 
     /* tslint:disable:variable-name */
     class Foo {
@@ -151,9 +152,9 @@ describe(`graphql - query, mutation, subscribe`, () => {
       public test: Function;
       public test2: Function;
 
-      /* tslint:disable:no-empty */
-      constructor(...args: any[]) {
-
+      constructor(apolloMock: any) {
+        // tslint:disable-next-line:no-unused-expression
+        apolloMock;
       }
     }
 
@@ -161,48 +162,45 @@ describe(`graphql - query, mutation, subscribe`, () => {
   };
 
   it('query - should execute watchQuery with the correct query object', () => {
-    let input = [{
+    const input = [{
       query,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
 
-    expect(spyWatchQuery).toBeCalledWith({query});
+    expect(spyWatchQuery).toBeCalledWith({ query });
   });
 
   it('query - should execute watchQuery with the correct query options', () => {
-    let options = {
+    const options = {
       variables: {
         test: 1,
       },
     };
-
-    let input = [{
+    const input = [{
       query,
       options,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
 
     expect(spyWatchQuery).toBeCalledWith({query, variables: options.variables});
   });
 
   it('query - should execute watchQuery with the correct query options (options as function)', () => {
-    let optionsValue = {
+    const optionsValue = {
       variables: {
         test: 1,
       },
     };
-
-    let options = () => {
-      return optionsValue;
-    };
-
-    let input = [{
+    const input = [{
       query,
-      options,
+      options: () => optionsValue,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
 
     expect(spyWatchQuery).toBeCalledWith({query, variables: optionsValue.variables});
@@ -210,27 +208,27 @@ describe(`graphql - query, mutation, subscribe`, () => {
 
   it('query - should execute options function with the correct context', () => {
     let context = null;
-
-    let options = (c) => {
+    const options = (c) => {
       context = c;
     };
-
-    let input = [{
+    const input = [{
       query,
       options,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
 
     expect(context).toBe(foo);
   });
 
   it('query with subscriptions - should create subscription on call', () => {
-    let input = [{
+    const input = [{
       subscription: subscription,
       name: 'test',
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
     foo.test();
 
@@ -238,18 +236,20 @@ describe(`graphql - query, mutation, subscribe`, () => {
   });
 
   it('subscriptions - should create subscription with variables and updateQueries', () => {
-    const updateQueries = () => {};
+    const updateQueries = () => {
+      //
+    };
     const variables = {
       test: 1,
     };
-
-    let input = [{
+    const input = [{
       subscription: subscription,
       name: 'test',
       variables,
       updateQueries,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
     foo.test();
 
@@ -257,17 +257,20 @@ describe(`graphql - query, mutation, subscribe`, () => {
   });
 
   it('subscriptions - should execute subscription with variables and updateQueries', () => {
-    const updateQueries = () => {};
+    const updateQueries = () => {
+      //
+    };
     const variables = {
       test: 1,
     };
 
-    let input = [{
+    const input = [{
       subscription: subscription,
       name: 'test',
     }];
 
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
     foo.test({
       variables,
@@ -278,7 +281,7 @@ describe(`graphql - query, mutation, subscribe`, () => {
   });
 
   it('query - should execute watchQuery with the correct query options (options as function with fragments)', () => {
-    let optionsValue = {
+    const optionsValue = {
       variables: {
         test: 1,
       },
@@ -287,22 +290,22 @@ describe(`graphql - query, mutation, subscribe`, () => {
       ],
     };
 
-    let options = () => {
+    const options = () => {
       return optionsValue;
     };
-
-    let input = [{
+    const input = [{
       query,
       options,
     }];
-    let foo = createInstance(input);
+    const foo = createInstance(input);
+
     foo.ngOnInit();
 
     expect(spyWatchQuery).toBeCalledWith({query, variables: optionsValue.variables, fragments: optionsValue.fragments});
   });
 
   it('mutation - should create execution method on the instance', () => {
-    let foo = createInstance([{
+    const foo = createInstance([{
       name: 'myMutation',
       mutation,
     }]);
@@ -314,7 +317,7 @@ describe(`graphql - query, mutation, subscribe`, () => {
   });
 
   it('mutation - should trigger mutation when executed (without params on call)', () => {
-    let foo = createInstance([{
+    const foo = createInstance([{
       name: 'mutation',
       mutation,
     }]);
@@ -329,7 +332,7 @@ describe(`graphql - query, mutation, subscribe`, () => {
     const executionOptionsString = Object.keys(executionOptions).join(', ');
 
     it(`mutation - should trigger mutation when executed (with ${executionOptionsString})`, () => {
-      let foo = createInstance([{
+      const foo = createInstance([{
         name: 'mutation',
         mutation,
       }]);
@@ -343,20 +346,26 @@ describe(`graphql - query, mutation, subscribe`, () => {
 
   const createMutationWithBase = (creationOptions: any = {}) => {
     const creationOptionsString = Object.keys(creationOptions).join(', ');
+
     return {
       andExecuteWith: (executionOptions: any = {}) => {
         const executionOptionsString = Object.keys(executionOptions).join(', ');
 
         it(`mutation - should create with (${creationOptionsString}) and trigger with ${executionOptionsString}`, () => {
-          let foo = createInstance([Object.assign({
-            name: 'mutation',
-            mutation,
-          }, creationOptions)]);
+          const foo = createInstance([
+            Object.assign({
+              name: 'mutation',
+              mutation,
+            },
+            creationOptions),
+          ]);
 
           foo.ngOnInit();
           foo['mutation'](executionOptions);
 
-          expect(spyMutate).toBeCalledWith(Object.assign({mutation}, creationOptions, executionOptions));
+          expect(spyMutate).toBeCalledWith(
+            Object.assign({ mutation }, creationOptions, executionOptions),
+          );
         });
       },
     };
@@ -373,7 +382,7 @@ describe(`graphql - query, mutation, subscribe`, () => {
       test: 1,
     },
     updateQueries: () => {
-
+      //
     },
   });
 
@@ -386,14 +395,14 @@ describe(`graphql - query, mutation, subscribe`, () => {
 
   createMutationWithBase({
     updateQueries: () => {
-
+      //
     },
   }).andExecuteWith();
 
   // Need to use both updateQueries and variables
   createMutationWithBase({
     updateQueries: () => {
-
+      //
     },
   }).andExecuteWith({
     variables: {

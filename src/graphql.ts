@@ -1,33 +1,39 @@
-import {Document, FragmentDefinition} from 'graphql';
-import {Angular2Apollo} from './Angular2Apollo';
-import {MutationOptions, MutationBehavior, MutationQueryReducersMap} from 'apollo-client';
-import * as _ from 'lodash';
+import { Document, FragmentDefinition } from 'graphql';
+import { Angular2Apollo } from './Angular2Apollo';
+import { MutationOptions, MutationBehavior, MutationQueryReducersMap } from 'apollo-client';
+
+const isFunction = require('lodash.isfunction');
+const isObject = require('lodash.isobject');
+const omit = require('lodash.omit');
 const replaceConstructor = require('replace-constructor');
 
-export type CommonInput = {
-  name?: string;
-} & OptionsObject
+// Types
+
+export type Variables = { [key: string]: any };
 
 export type OptionsMethod = (options: any) => Object;
 
 export type WithVariables = {
-  variables?: any;
-}
+  variables?: Variables;
+};
 
-export type OptionsObject = WithVariables & {
-  fragments?: any[];
-}
+export type OptionsObject = WithVariables & {};
+
+export type CommonInput = {
+  name?: string;
+  fragments?: FragmentDefinition[];
+};
 
 export type QueryInput = {
   query: Document;
-  options?: OptionsMethod | (OptionsObject & WithVariables);
+  options?: OptionsMethod | OptionsObject;
   subscriptions?: SubscriptionInput | SubscriptionInput[];
-}
+};
 
 export type MutationInput = MutationOptions;
 
 export type MutationExecutionInput = {
-  variables?: Object;
+  variables?: Variables;
   resultBehaviors?: MutationBehavior[];
   fragments?: FragmentDefinition[];
   optimisticResponse?: Object;
@@ -36,19 +42,15 @@ export type MutationExecutionInput = {
 };
 
 export type SubscriptionExecutionInput = {
-  variables?: {
-    [key: string]: any;
-  };
+  variables?: Variables;
   updateQuery?: (previousQueryResult: Object, options: {
     subscriptionData: {
       data: any;
     };
-    variables: {
-      [key: string]: any;
-    };
+    variables: Variables;
   }) => Object;
   onError?: (error: Error) => void;
-}
+};
 
 export type SubscriptionInput = {
   name?: string;
@@ -59,7 +61,9 @@ export type GraphqlInput = (QueryInput | MutationInput | SubscriptionInput) & Co
 
 export type ContextWithApollo = {
   __apollo: Angular2Apollo;
-}
+};
+
+// helpers
 
 function isQueryInput(input: any): input is QueryInput {
   return (input as QueryInput).query !== undefined;
@@ -114,8 +118,8 @@ export function graphql(input: GraphqlInput[]): (target: any) => any {
 export function assignInput(context: ContextWithApollo): (input: GraphqlInput) => void {
   return (input: GraphqlInput): void => {
     let value: any;
+    let nameDocument: Document;
     let name: string = input.name;
-    let nameDocument: any;
 
     let inputOptions = inputToOptions(input, context);
 
@@ -132,9 +136,9 @@ export function assignInput(context: ContextWithApollo): (input: GraphqlInput) =
     } else if (isSubscriptionInput(input)) {
       value = (executionInput: SubscriptionExecutionInput = {}) => {
         return context.__apollo.subscribe(Object.assign(
-          {query: input.subscription},
-          _.omit(input, 'name', 'subscription'),
-          executionInput
+          { query: input.subscription },
+          omit(input, 'name', 'subscription'),
+          executionInput,
         ));
       };
 
@@ -171,7 +175,7 @@ export function wrapPrototype(target: any) {
   };
 }
 
-const buildCommonOptions = (input: CommonInput, context: ContextWithApollo) => {
+function buildCommonOptions(input: CommonInput, context: ContextWithApollo): Object {
   let result: any = {};
 
   if (input.fragments) {
@@ -181,9 +185,9 @@ const buildCommonOptions = (input: CommonInput, context: ContextWithApollo) => {
   if (isQueryInput(input) && input.options) {
     let options: any;
 
-    if (_.isFunction(input.options)) {
-      options = input.options(context);
-    } else if (_.isObject(input.options)) {
+    if (isFunction(input.options)) {
+      options = (input.options as OptionsMethod)(context);
+    } else if (isObject(input.options)) {
       options = input.options;
     }
 
@@ -191,12 +195,12 @@ const buildCommonOptions = (input: CommonInput, context: ContextWithApollo) => {
   }
 
   return result;
-};
+}
 
 export function inputToOptions(input: GraphqlInput, context: ContextWithApollo): any {
-  let common = buildCommonOptions(input, context);
+  const common = buildCommonOptions(input, context);
 
-  return Object.assign({}, common, _.omit(input, 'name', 'options'));
+  return Object.assign({}, common, omit(input, 'name', 'options'));
 }
 
 export function getNameOfDocument(doc: Document): string {

@@ -12,7 +12,7 @@
     "experimentalDecorators": true,
     "noImplicitAny": false,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true
   },
   "files": [
