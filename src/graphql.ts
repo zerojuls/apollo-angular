@@ -1,6 +1,6 @@
-import { Document, FragmentDefinition } from 'graphql';
-import { Angular2Apollo } from './Angular2Apollo';
-import { MutationOptions, MutationBehavior, MutationQueryReducersMap } from 'apollo-client';
+import { DocumentNode, FragmentDefinitionNode } from 'graphql';
+import { Apollo } from './Apollo';
+import { MutationOptions, MutationQueryReducersMap } from 'apollo-client';
 
 const isFunction = require('lodash.isfunction');
 const isObject = require('lodash.isobject');
@@ -21,11 +21,11 @@ export type OptionsObject = WithVariables & {};
 
 export type CommonInput = {
   name?: string;
-  fragments?: FragmentDefinition[];
+  fragments?: FragmentDefinitionNode[];
 };
 
 export type QueryInput = {
-  query: Document;
+  query: DocumentNode;
   options?: OptionsMethod | OptionsObject;
   subscriptions?: SubscriptionInput | SubscriptionInput[];
 };
@@ -34,8 +34,8 @@ export type MutationInput = MutationOptions;
 
 export type MutationExecutionInput = {
   variables?: Variables;
-  resultBehaviors?: MutationBehavior[];
-  fragments?: FragmentDefinition[];
+  resultBehaviors?: any[];
+  fragments?: FragmentDefinitionNode[];
   optimisticResponse?: Object;
   updateQueries?: MutationQueryReducersMap;
   refetchQueries?: string[];
@@ -54,13 +54,13 @@ export type SubscriptionExecutionInput = {
 
 export type SubscriptionInput = {
   name?: string;
-  subscription: Document;
+  subscription: DocumentNode;
 } & SubscriptionExecutionInput;
 
 export type GraphqlInput = (QueryInput | MutationInput | SubscriptionInput) & CommonInput;
 
 export type ContextWithApollo = {
-  __apollo: Angular2Apollo;
+  __apollo: Apollo;
 };
 
 // helpers
@@ -93,7 +93,7 @@ export function graphql(input: GraphqlInput[]): (target: any) => any {
     const injects = Reflect.getMetadata('design:paramtypes', target);
 
     // replace a constructor to get the access to Angular2Apollo service
-    const wrapped = replaceConstructor(target, function (apollo: Angular2Apollo, ...injs) {
+    const wrapped = replaceConstructor(target, function (apollo: Apollo, ...injs) {
       Object.defineProperty(this, '__apollo', {
         value: apollo,
         enumerable: true,
@@ -105,7 +105,7 @@ export function graphql(input: GraphqlInput[]): (target: any) => any {
     });
 
     // define new parameters by prepending Angular2Apollo
-    Reflect.defineMetadata('design:paramtypes', [Angular2Apollo, ...injects], wrapped);
+    Reflect.defineMetadata('design:paramtypes', [Apollo, ...injects], wrapped);
 
     wrapPrototype(wrapped)('ngOnInit', function () {
       input.forEach(assignInput(this));
@@ -118,7 +118,7 @@ export function graphql(input: GraphqlInput[]): (target: any) => any {
 export function assignInput(context: ContextWithApollo): (input: GraphqlInput) => void {
   return (input: GraphqlInput): void => {
     let value: any;
-    let nameDocument: Document;
+    let nameDocument: DocumentNode;
     let name: string = input.name;
 
     let inputOptions = inputToOptions(input, context);
@@ -203,6 +203,6 @@ export function inputToOptions(input: GraphqlInput, context: ContextWithApollo):
   return Object.assign({}, common, omit(input, 'name', 'options'));
 }
 
-export function getNameOfDocument(doc: Document): string {
+export function getNameOfDocument(doc: DocumentNode): string {
   return doc.definitions[0]['name'].value;
 }

@@ -1,27 +1,27 @@
 import './_common';
 
-import { Document } from 'graphql';
+import { DocumentNode } from 'graphql';
 
 import { graphql, wrapPrototype, assignInput, GraphqlInput } from '../src/graphql';
-import { Angular2Apollo } from '../src';
+import { Apollo } from '../src';
 
 import gql from 'graphql-tag';
 
-const query: Document = gql`
+const query: DocumentNode = gql`
   query getBar {
     bar {
       name
     }
   }
 `;
-const mutation: Document = gql`
+const mutation: DocumentNode = gql`
   mutation changeBar {
     changeBar {
       name
     }
   }
 `;
-const subscription: Document = gql`
+const subscription: DocumentNode = gql`
   subscription dataChange {
     dataChange {
       name
@@ -62,7 +62,7 @@ describe('assignInput', () => {
         watchQuery(options) {
           spy(options);
         },
-      } as Angular2Apollo;
+      } as Apollo;
     }
 
     const foo = new Foo;
