@@ -24,14 +24,14 @@ export const mergeHeaders = (
 };
 
 export const bodyToParams = (body: Body): HttpParams => {
-  const headers = new HttpParams()
+  const params = new HttpParams()
     .set('query', JSON.stringify(body.query))
     .set('operationName', body.operationName)
     .set('variables', JSON.stringify(body.variables));
 
   if (body.extensions) {
-    return headers.set('extensions', JSON.stringify(body.extensions));
+    return params.set('extensions', JSON.stringify(body.extensions));
   }
 
-  return headers;
+  return params;
 };
