@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {
   ApolloLink,
   Observable as LinkObservable,
@@ -11,7 +11,7 @@ import {ExecutionResult} from 'graphql';
 import {Observable} from 'rxjs/Observable';
 
 import {Options, Request, Context} from './types';
-import {normalizeUrl, mergeHeaders} from './utils';
+import {normalizeUrl, mergeHeaders, bodyToParams} from './utils';
 
 // XXX find a better name for it
 export class HttpLinkHandler extends ApolloLink {
@@ -79,11 +79,7 @@ export class HttpLinkHandler extends ApolloLink {
               body: req.body,
             };
           } else {
-            const params = Object.keys(req.body).reduce(
-              (httpParams, param) =>
-                httpParams.set(param, (req.body as any)[param]),
-              new HttpParams(),
-            );
+            const params = bodyToParams(req.body);
 
             bodyOrParams = {params};
           }

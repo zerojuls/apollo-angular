@@ -167,6 +167,46 @@ describe('HttpLink', () => {
   );
 
   test(
+    'should stringify http params',
+    async(
+      inject(
+        [HttpLink, HttpTestingController],
+        (httpLink: HttpLink, httpBackend: HttpTestingController) => {
+          const link = httpLink.create({
+            uri: 'graphql',
+            method: 'GET',
+          });
+          const op = {
+            query: gql`
+              query heroes {
+                heroes {
+                  name
+                }
+              }
+            `,
+            operationName: 'heroes',
+            variables: {
+              foo: 'foo',
+            },
+          };
+
+          execute(link, op).subscribe(noop);
+
+          httpBackend.match(req => {
+            expect(req.urlWithParams).toBe('t');
+            expect(req.method).toBe('GET');
+            expect(req.params.get('operationName')).toBe(op.operationName);
+            expect(req.params.get('query')).toContain('"query');
+            expect(typeof req.params.get('variables')).toBe('string');
+            expect(req.params.has('extensions')).toBe(false);
+            return true;
+          });
+        },
+      ),
+    ),
+  );
+
+  test(
     'should include extensions if allowed',
     async(
       inject(
