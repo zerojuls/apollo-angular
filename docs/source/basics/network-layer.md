@@ -111,7 +111,6 @@ The following examples shows how you'd create a middleware. In both examples, we
 import { Apollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular-link-http';
 import { ApolloLink, concat } from 'apollo-link';
-import { HttpHeaders } from '@angular/common/http';
 
 @NgModule({ ... })
 class AppModule {
@@ -124,7 +123,7 @@ class AppModule {
     const authMiddleware = new ApolloLink((operation, forward) => {
       // add the authorization to the headers
       operation.setContext({
-        headers: new HttpHeaders().set('Authorization', localStorage.getItem('token') || null)
+        headers: { 'Authorization': localStorage.getItem('token') || null }
       }));
 
       return forward(operation);
@@ -157,9 +156,11 @@ class AppModule {
 
     const authMiddleware = new ApolloLink((operation, forward) => {
       // add the authorization to the headers
-      // we assume `headers` as a defined instance of HttpHeaders
       operation.setContext(({ headers }) => ({
-        headers: headers.append('Authorization', localStorage.getItem('token') || null),
+        headers: {
+          ...headers,
+          Authorization: localStorage.getItem('token') || null,
+        },
       }));
 
       return forward(operation);
@@ -167,9 +168,11 @@ class AppModule {
 
     const otherMiddleware = new ApolloLink((operation, forward) => {
       // add the authorization to the headers
-      // we assume `headers` as a defined instance of HttpHeaders
       operation.setContext(({ headers }) => ({
-        headers: headers.append('recent-activity', localStorage.getItem('lastOnlineTime') || null)
+        headers: {
+          ...headers,
+          'recent-activity': localStorage.getItem('lastOnlineTime') || null,
+        }
       }));
 
       return forward(operation);

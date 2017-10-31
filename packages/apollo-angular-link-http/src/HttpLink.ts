@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpResponse, HttpHeaders} from '@angular/common/http';
 import {
   ApolloLink,
   Observable as LinkObservable,
@@ -11,7 +11,7 @@ import {ExecutionResult} from 'graphql';
 import {Observable} from 'rxjs/Observable';
 
 import {Options, Request, Context} from './types';
-import {normalizeUrl, mergeHeaders, bodyToParams} from './utils';
+import {normalizeUrl, bodyToParams} from './utils';
 
 // XXX find a better name for it
 export class HttpLinkHandler extends ApolloLink {
@@ -26,46 +26,44 @@ export class HttpLinkHandler extends ApolloLink {
     this.requester = new ApolloLink(
       (operation: Operation) =>
         new LinkObservable((observer: any) => {
-          const {
-            headers,
-            withCredentials,
-            method,
-          }: Context = operation.getContext();
-
-          const {operationName, variables, query, extensions} = operation;
+          const context: Context = operation.getContext();
 
           const req: Request = {
             method: this.options.method || 'POST',
             url: normalizeUrl(this.options.uri) || 'graphql',
             body: {
-              operationName,
-              variables,
-              query: print(query),
+              operationName: operation.operationName,
+              variables: operation.variables,
+              query: print(operation.query),
             },
             options: {
               withCredentials: this.options.withCredentials,
-              headers: this.options.headers,
             },
           };
 
           // allow for sending extensions
           if (this.options.includeExtensions) {
-            req.body.extensions = extensions;
+            req.body.extensions = operation.extensions;
           }
 
           // Apply settings from request's context
 
           // overwrite withCredentials
-          if (typeof withCredentials !== 'undefined') {
-            req.options.withCredentials = withCredentials;
+          if (typeof context.withCredentials !== 'undefined') {
+            req.options.withCredentials = context.withCredentials;
           }
           // merge headers
-          if (headers) {
-            req.options.headers = mergeHeaders(req.options.headers, headers);
+          if (context.headers) {
+            req.options.headers = new HttpHeaders({
+              ...this.options.headers,
+              ...context.headers,
+            });
+          } else {
+            req.options.headers = new HttpHeaders(this.options.headers);
           }
           // overwrite method
-          if (method) {
-            req.method = method;
+          if (context.method) {
+            req.method = context.method;
           }
 
           // `body` for some, `params` for others

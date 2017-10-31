@@ -287,7 +287,7 @@ class AppModule {
     const http = httpLink.create({ uri: '/graphql' });
 
     const middleware = setContext(() => ({
-      headers: new HttpHeaders().set('Authorization', localStorage.getItem('token') || null)
+      headers: { 'Authorization', localStorage.getItem('token') || null },
     }));
 
     // use with Apollo.create()

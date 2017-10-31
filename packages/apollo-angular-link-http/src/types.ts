@@ -7,7 +7,9 @@ export type HttpRequestOptions = {
 
 export type FetchOptions = {
   method?: string;
-} & HttpRequestOptions;
+  headers?: Record<string, any>;
+  withCredentials?: boolean;
+};
 
 export type Options = {
   uri?: string;

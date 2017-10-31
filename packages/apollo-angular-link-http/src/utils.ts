@@ -1,27 +1,9 @@
-import {HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpParams} from '@angular/common/http';
 
 import {Body} from './types';
 
 export const normalizeUrl = (url: string): string =>
   url.replace(/^\/|\/$/g, '');
-
-export const mergeHeaders = (
-  source: HttpHeaders,
-  destination: HttpHeaders,
-): HttpHeaders => {
-  if (source && destination) {
-    const merged = destination
-      .keys()
-      .reduce(
-        (headers, name) => headers.set(name, destination.getAll(name)),
-        source,
-      );
-
-    return merged;
-  }
-
-  return destination || source;
-};
 
 export const bodyToParams = (body: Body): HttpParams => {
   const params = new HttpParams()

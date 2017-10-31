@@ -42,7 +42,6 @@ Note: the backend must also allow credentials from the requested origin. e.g. if
 Another common way to identify yourself when using HTTP is to send along an authorization header. Apollo Links make creating middlewares that lets you modify requests before they are sent to the server. It's easy to add an `Authorization` header to every HTTP request. In this example, we'll pull the login token from `localStorage` every time a request is sent:
 
 ```js
-import { HttpHeaders } from '@angular/common/http';
 import { Apollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular-link-http';
 import { setContext } from 'apollo-link-context';
@@ -60,13 +59,11 @@ class AppModule {
       // get the authentication token from local storage if it exists
       const token = localStorage.getItem('token');
       // return the headers to the context so httpLink can read them
-      // in this example we assume headers property exists
-      // and it is an instance of HttpHeaders
       if (!token) {
         return {};
       } else {
         return {
-          headers: headers.append('Authorization', `Bearer ${token}`)
+          headers: { Authorization: `Bearer ${token}` }
         };
       }
     });

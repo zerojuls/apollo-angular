@@ -3,7 +3,7 @@ import {setupAngular} from './_setup';
 import gql from 'graphql-tag';
 
 import {TestBed, inject, async} from '@angular/core/testing';
-import {HttpClientModule, HttpHeaders} from '@angular/common/http';
+import {HttpClientModule} from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -193,7 +193,6 @@ describe('HttpLink', () => {
           execute(link, op).subscribe(noop);
 
           httpBackend.match(req => {
-            expect(req.urlWithParams).toBe('t');
             expect(req.method).toBe('GET');
             expect(req.params.get('operationName')).toBe(op.operationName);
             expect(req.params.get('query')).toContain('"query');
@@ -313,7 +312,7 @@ describe('HttpLink', () => {
         (httpLink: HttpLink, httpBackend: HttpTestingController) => {
           const link = httpLink.create({
             uri: 'graphql',
-            headers: new HttpHeaders().set('X-Custom-Header', 'foo'),
+            headers: {'X-Custom-Header': 'foo'},
           });
           const op = {
             query: gql`
@@ -354,7 +353,7 @@ describe('HttpLink', () => {
               }
             `,
             context: {
-              headers: new HttpHeaders().set('X-Custom-Header', 'foo'),
+              headers: {'X-Custom-Header': 'foo'},
             },
           };
 
@@ -377,7 +376,7 @@ describe('HttpLink', () => {
         (httpLink: HttpLink, httpBackend: HttpTestingController) => {
           const link = httpLink.create({
             uri: 'graphql',
-            headers: new HttpHeaders().set('X-Custom-Foo', 'foo'),
+            headers: {'X-Custom-Foo': 'foo'},
           });
           const op = {
             query: gql`
@@ -388,7 +387,7 @@ describe('HttpLink', () => {
               }
             `,
             context: {
-              headers: new HttpHeaders().set('X-Custom-Bar', 'bar'),
+              headers: {'X-Custom-Bar': 'bar'},
             },
           };
 
@@ -413,7 +412,7 @@ describe('HttpLink', () => {
           const link = httpLink.create({
             uri: 'graphql',
             withCredentials: true,
-            headers: new HttpHeaders().set('X-Custom-Header', 'foo'),
+            headers: {'X-Custom-Header': 'foo'},
           });
           const op = {
             query: gql`
@@ -425,7 +424,7 @@ describe('HttpLink', () => {
             `,
             context: {
               withCredentials: false,
-              headers: new HttpHeaders().set('X-Custom-Header', 'bar'),
+              headers: {'X-Custom-Header': 'bar'},
             },
           };
 

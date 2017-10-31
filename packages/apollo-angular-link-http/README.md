@@ -41,7 +41,7 @@ HTTP Link takes an object with some options on it to customize the behavior of t
 |---|---|---|---|
 |uri|string|"/graphql"|false|
 |includeExtensions|boolean|false|false|
-|headers|HttpHeaders|none|false|
+|headers|Object|none|false|
 |withCredentials|boolean|none|false|
 |method|string|POST|false|
 
@@ -52,7 +52,7 @@ The HTTP Link uses the `headers` field on the context to allow passing headers t
 
 |name|value|default|required|
 |---|---|---|---|
-|headers|HttpHeaders|none|false|
+|headers|Object|none|false|
 |withCredentials|boolean|false|false|
 |method|string|POST|false|
 
@@ -86,7 +86,7 @@ apollo.query({
   query: MY_QUERY,
   context: {
     // example of setting the headers with context per operation
-    headers: new HttpHeaders().set('X-Custom-Header', 'custom-value')
+    headers: { 'X-Custom-Header': 'custom-value' }
   }
 })
 ```
@@ -102,7 +102,7 @@ class AppModule {
     const http = httpLink.create({ uri: '/graphql' });
     const middleware = new ApolloLink((operation, forward) => {
       operation.setContext({
-        headers: new HttpHeaders().set('Authorization', localStorage.getItem('token') || null)
+        headers: { 'Authorization': localStorage.getItem('token') || null }
       });
       return forward(operation)
     })
