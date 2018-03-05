@@ -1,0 +1,43 @@
+{
+  "name": "apollo-link-zone",
+  "author":
+    "Kamil Kisiela <kamil.kisiela@gmail.com> (http://github.com/kamilkisiela/)",
+  "license": "MIT",
+  "main": "./build/bundle.umd.js",
+  "module": "./build/src/index.js",
+  "jsnext:main": "./build/src/index.js",
+  "typings": "./build/src/index.d.ts",
+  "version": "1.0.0-beta.0",
+  "repository": {
+    "type": "git",
+    "url": "apollographql/apollo-angular"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/ngc -p tsconfig.build.json",
+    "bundle": "rollup -c rollup.config.js",
+    "test": "npm run test-only",
+    "test-only": "jest --config jest.config.js",
+    "lint":
+      "tslint -c ../../tslint.json -p tsconfig.json --type-check {src,tests}/*.ts",
+    "postbuild": "npm run bundle",
+    "deploy": "../../scripts/deploy.sh"
+  },
+  "peerDependencies": {
+    "apollo-link": "^1.0.0",
+    "zone.js": "^0.8.4"
+  },
+  "devDependencies": {
+    "@types/graphql": "^0.10.2",
+    "@types/jest": "^21.1.2",
+    "@types/zen-observable": "^0.5.3",
+    "apollo-link": "^1.0.0",
+    "graphql": "^0.11.7",
+    "graphql-tag": "^2.5.0",
+    "jest": "^21.2.1",
+    "jest-zone-patch": "0.0.8",
+    "rollup": "^0.50.0",
+    "ts-jest": "^21.1.2",
+    "typescript": "^2.5.3",
+    "zone.js": "^0.8.4"
+  }
+}
